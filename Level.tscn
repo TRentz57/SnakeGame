@@ -1,0 +1,79 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Snake.tscn" type="PackedScene" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node2D
+
+onready var apple = preload(\"res://Apple.tscn\")
+
+var score = 0
+var highscore = 0 setget set_highscore
+const filepath = \"/Users/trentz/Desktop/highscore.data\"
+
+func _ready():
+	load_highscore()
+	add_apple()
+	
+func _process(delta):
+	
+	$Score.text = \"Points: \" + (str(score))
+	$HighScore.text = \"Highscore: \" + (str(highscore))
+	
+	
+func add_apple():
+	var instance = apple.instance()
+	instance.position = Vector2(rand_range(500,50),rand_range(500,50))
+	instance.connect(\"Apple_Eaten\",self,\"spawn_new\") 
+	add_child(instance)
+	
+func spawn_new():
+	score+=1
+	add_apple()
+	get_node(\"Snake\").add_tail()
+
+func load_highscore():
+	var file = File.new()
+	if not file.file_exists(filepath): 
+		return
+		file.open(filepath, File.READ)
+		highscore = file.get_var()
+		file.close()
+		pass
+		
+func save_highscore():
+	var file = File.new()
+	file.open(filepath, File.WRITE)
+	file.store_var(highscore)
+	file.close()
+	pass
+
+func set_highscore(new_score):
+	highscore = new_score
+	if score > highscore:
+		score = highscore
+	save_highscore()
+	pass
+	
+	
+	
+"
+
+[node name="Level" type="Node2D"]
+position = Vector2( 4, 2.91605 )
+script = SubResource( 1 )
+
+[node name="Snake" parent="." instance=ExtResource( 1 )]
+position = Vector2( 39.0793, 51.3623 )
+
+[node name="Score" type="Label" parent="."]
+margin_left = -3.80423
+margin_top = -2.60186
+margin_right = 55.1958
+margin_bottom = 18.3981
+
+[node name="HighScore" type="Label" parent="."]
+margin_left = -3.49227
+margin_top = 17.612
+margin_right = 53.5077
+margin_bottom = 31.612
